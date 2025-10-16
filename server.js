@@ -1,14 +1,21 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-
+const express = require("express");
+const path = require("path");
 const app = express();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// ✅ Endpoint dinámico para cualquier video
+// Puerto de Render o local
+const PORT = process.env.PORT || 3000;
+
+// Middleware para logs simples
+app.use((req, res, next) => {
+  console.log(`🌐 Request: ${req.method} ${req.url}`);
+  next();
+});
+
+// Ruta principal para enviar video
+// Ejemplo: /video?name=bienvenida
 app.get("/video", (req, res) => {
   const name = req.query.name || "bienvenida";
-  const videoPath = path.join(__dirname, "videos", `${name}.mp4`);
+  const videoPath = path.join(__dirname, `${name}.mp4`);
 
   console.log("🎬 Solicitando video:", videoPath);
 
@@ -20,11 +27,12 @@ app.get("/video", (req, res) => {
   });
 });
 
-// ✅ Página de prueba para ver si el servidor está activo
+// Ruta de prueba
 app.get("/", (req, res) => {
-  res.send("🚀 CoreVault Video Server está activo y listo.");
+  res.send("✅ Server Render activo. Usa /video?name=bienvenida para probar tu video.");
 });
 
-// ✅ Puerto
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`✅ Servidor activo en puerto ${PORT}`));
+// Iniciar server
+app.listen(PORT, () => {
+  console.log(`🚀 Server activo en puerto ${PORT}`);
+});
