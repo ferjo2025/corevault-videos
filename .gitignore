@@ -1,5 +1,17 @@
-node_modules
-.vscode
-.DS_Store
+# Node.js
+node_modules/
 .env
-videos/*.tmp
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Render o builds
+dist/
