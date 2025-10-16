@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -8,12 +9,11 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Crear app Express
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===========================
-// 🔹 Middleware para logs
+// 🔹 Middleware de logs
 // ===========================
 app.use((req, res, next) => {
   console.log(`🌐 Request: ${req.method} ${req.url}`);
@@ -21,28 +21,23 @@ app.use((req, res, next) => {
 });
 
 // ===========================
-// 🔹 Ruta de prueba
+// 🔹 Ruta principal de prueba
 // ===========================
 app.get("/", (req, res) => {
-  res.send(
-    "✅ Server Render activo. Usa /video?name=bienvenida para probar tu video."
-  );
+  res.send("✅ Server Render activo. Usa /video?name=bienvenida para probar tu video.");
 });
 
 // ===========================
 // 🔹 Ruta para enviar videos
 // ===========================
-// Ejemplo: /video?name=bienvenida
+// Ejemplo de uso: /video?name=bienvenida
 app.get("/video", (req, res) => {
-  const name = req.query.name || "bienvenida"; // Nombre del video sin extensión
-  const videoPath = path.join(__dirname, `${name}.mp4`);
+  const name = req.query.name || "bienvenida";       // nombre del video
+  const videoPath = path.join(__dirname, `${name}.mp4`); // archivo en la raíz
 
   console.log("🎬 Solicitando video:", videoPath);
 
-  // Establecer el Content-Type correcto antes de enviar
-  res.set("Content-Type", "video/mp4");
-
-  // Enviar archivo
+  // Enviar video con encabezado correcto
   res.sendFile(videoPath, (err) => {
     if (err) {
       console.error("❌ Error enviando video:", err.message);
