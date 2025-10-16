@@ -1,17 +1,20 @@
-const express = require("express");
-const path = require("path");
-const app = express();
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Puerto de Render o local
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para logs simples
+// Middleware simple para logs
 app.use((req, res, next) => {
   console.log(`🌐 Request: ${req.method} ${req.url}`);
   next();
 });
 
-// Ruta principal para enviar video
+// Ruta para enviar video por query
 // Ejemplo: /video?name=bienvenida
 app.get("/video", (req, res) => {
   const name = req.query.name || "bienvenida";
