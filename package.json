@@ -1,0 +1,13 @@
+{
+  "name": "corevault-videos",
+  "version": "1.0.0",
+  "description": "Microservicio para servir videos de bienvenida y promos de Core Vault",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "path": "^0.12.7"
+  }
+}
