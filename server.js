@@ -1,11 +1,11 @@
-// server.js
+// ===================================================
+// 🎥 CORE VAULT MEDIA SERVER (2 videos por ahora)
+// ===================================================
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
-// ===========================
-// 🔹 Configuración de rutas
-// ===========================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -13,44 +13,78 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ===========================
-// 🔹 Middleware de logs
+// 🔹 Logs de requests
 // ===========================
 app.use((req, res, next) => {
-  console.log(`🌐 Request: ${req.method} ${req.url}`);
+  console.log(`🌐 ${new Date().toISOString()} | ${req.method} ${req.url}`);
   next();
 });
 
 // ===========================
-// 🔹 Ruta principal de prueba
+// 🔹 Ruta raíz de prueba
 // ===========================
 app.get("/", (req, res) => {
-  res.send("✅ Server Render activo. Usa /video?name=bienvenida para probar tu video.");
+  res.send(`
+    ✅ Core Vault Media Server Activo<br><br>
+    🎬 Videos disponibles:<br>
+    - <a href="/video?name=bienvenidadash">bienvenidadash</a><br>
+    - <a href="/video?name=invita">invita</a>
+  `);
 });
 
 // ===========================
-// 🔹 Ruta para enviar videos
+// 🎬 Ruta para videos (actualmente 2)
 // ===========================
-// Ejemplo de uso: /video?name=bienvenida
 app.get("/video", (req, res) => {
-  const name = req.query.name || "bienvenida";       // nombre del video
-  const videoPath = path.join(__dirname, `${name}.mp4`); // archivo en la raíz
+  const name = req.query.name;
 
-  console.log("🎬 Solicitando video:", videoPath);
+  // Lista blanca de videos permitidos
+  const allowedVideos = ["bienvenidadash", "invita"];
 
-  // Enviar video con encabezado correcto
-  res.sendFile(videoPath, (err) => {
-    if (err) {
-      console.error("❌ Error enviando video:", err.message);
-      res.status(404).send("🎞️ Video no encontrado en el servidor.");
-    } else {
-      console.log(`✅ Video "${name}.mp4" enviado correctamente`);
-    }
-  });
+  if (!name) return res.status(400).send("⚠️ Falta el parámetro 'name'.");
+  if (!allowedVideos.includes(name)) return res.status(404).send("❌ Video no permitido.");
+
+  const videoPath = path.join(__dirname, `${name}.mp4`);
+
+  if (!fs.existsSync(videoPath)) {
+    return res.status(404).send("❌ Video no encontrado en el servidor.");
+  }
+
+  // ✅ Range requests para streaming
+  const stat = fs.statSync(videoPath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+    const chunkSize = end - start + 1;
+
+    const file = fs.createReadStream(videoPath, { start, end });
+    const head = {
+      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": chunkSize,
+      "Content-Type": "video/mp4",
+    };
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      "Content-Length": fileSize,
+      "Content-Type": "video/mp4",
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(videoPath).pipe(res);
+  }
+
+  console.log(`🎬 Video enviado: ${name}.mp4`);
 });
 
 // ===========================
-// 🔹 Iniciar servidor
+// 🚀 Iniciar servidor
 // ===========================
 app.listen(PORT, () => {
-  console.log(`🚀 Server activo en puerto ${PORT}`);
+  console.log(`🚀 Core Vault Media Server escuchando en puerto ${PORT}`);
 });
